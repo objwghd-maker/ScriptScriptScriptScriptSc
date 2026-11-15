@@ -87,7 +87,7 @@ function showGate(){
 /* ใส่ค่าจาก Firebase Console > Project settings > Your apps (Web) */
 const FIREBASE_CONFIG={apiKey:"ใส่ค่าของคุณ",authDomain:"",projectId:"",appId:""};
 let col,list,auth,fs,unsub,items=new Map(),drafts=new Map(),opened=new Map();
-function showLogin(){$app.replaceChildren(h("div",{class:"wrap gate"},h("h1",{},"📚 คลังสคริป"),h("div",{class:"mut"},"เข้าสู่ระบบเพื่อเปิดข้อมูลของคุณ"),h("div",{style:"height:16px"}),h("button",{class:"pri",onclick:()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(()=>toast("เข้าสู่ระบบไม่สำเร็จ"))},"เข้าสู่ระบบด้วย Google")))}
+function showLogin(ok=true){$app.replaceChildren(h("div",{class:"wrap gate"},h("h1",{},"📚 คลังสคริป"),h("div",{class:"mut"},"เข้าสู่ระบบเพื่อเปิดข้อมูลของคุณ"),h("div",{style:"height:16px"}),h("button",{class:"pri",style:"width:100%;padding:11px",onclick:()=>{if(!ok){toast("ยังไม่ได้ใส่ค่า FIREBASE_CONFIG");return}auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(()=>toast("เข้าสู่ระบบไม่สำเร็จ"))}},"เข้าสู่ระบบด้วย Google"),h("div",{style:"height:10px"}),h("button",{onclick:startLocal},"ใช้แบบเก็บในเครื่องนี้")))}
 function startLocal(){
   const K="vault_items";let mem={};
   const rd=()=>{try{return JSON.parse(localStorage.getItem(K)||"{}")}catch(e){return mem}};
@@ -100,7 +100,7 @@ function startLocal(){
   col.onSnapshot(sn=>{items=new Map(sn.docs.map(d=>[d.id,d.data()]));render()});
 }
 function start(){
-  if(!window.firebase||FIREBASE_CONFIG.apiKey.startsWith("ใส่")){startLocal();return}
+  if(!window.firebase||FIREBASE_CONFIG.apiKey.startsWith("ใส่")){showLogin(false);return}
   if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
   auth=firebase.auth();fs=firebase.firestore();
   auth.onAuthStateChanged(u=>{
