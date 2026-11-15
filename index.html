@@ -38,8 +38,9 @@ textarea{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;mi
 <body>
 <div id="app"></div><div id="toast"></div>
 <script>
+const API_BASE="https://YOUR-SERVICE.onrender.com";
 const $app=document.getElementById("app"),$t=document.getElementById("toast");
-const h=(t,p={},...c)=>{const e=document.createElement(t);for(const k in p){if(k.startsWith("on"))e.addEventListener(k.slice(2),p[k]);else if(k==="class")e.className=p[k];else if(k in e)e[k]=p[k];else e.setAttribute(k,p[k]);}c.flat().forEach(x=>x!=null&&e.append(x.nodeType?x:document.createTextNode(x)));return e};
+const h=(t,p={},...c)=>{const e=document.createElement(t);for(const k in p){if(k.startsWith("on"))e.addEventListener(k.slice(2),p[k]);else if(k==="class")e.className=p[k];else if(k==="style"&&typeof p[k]==="string")e.style.cssText=p[k];else if(k in e)e[k]=p[k];else e.setAttribute(k,p[k]);}c.flat().forEach(x=>x!=null&&e.append(x.nodeType?x:document.createTextNode(x)));return e};
 let tt;const toast=m=>{$t.textContent=m;$t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>$t.classList.remove("on"),2600)};
 const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 const b64=u=>{u=new Uint8Array(u);let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
@@ -47,77 +48,38 @@ const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const uid=()=>Math.random().toString(36).slice(2,10);
 const fsz=n=>n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
 let AC=ls.get("ac")||"";
-const NOSRV="หน้านี้ไม่ได้ทำงานผ่านเซิร์ฟเวอร์ server.js (เปิดไฟล์ตรง ๆ หรืออัปขึ้นโฮสต์เว็บธรรมดาจะเข้าไม่ได้ ต้องรัน node server.js)";
-async function api(p,body){let r;try{r=await fetch("/api/"+p,{method:"POST",headers:{"Content-Type":"application/json","x-access":AC},body:JSON.stringify(body)})}catch(e){throw new Error(NOSRV)}const j=await r.json().catch(()=>null);if(!j)throw new Error(NOSRV);if(!r.ok)throw new Error(j.error||"ผิดพลาด");return j}
-function ask(title,confirm){return new Promise(res=>{const a=h("input",{type:"password",placeholder:"รหัสผ่าน",autocomplete:"off"}),b=confirm?h("input",{type:"password",placeholder:"ยืนยันรหัสผ่านอีกครั้ง",autocomplete:"off"}):null,er=h("div",{class:"err"});
-const done=v=>{o.remove();res(v)};
-const ok=()=>{if(a.value.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";return}if(b&&a.value!==b.value){er.textContent="รหัสผ่านไม่ตรงกัน";return}done(a.value)};
-const o=h("div",{class:"ov"},h("div",{},h("b",{},title),a,b,er,h("div",{class:"row"},h("button",{class:"pri",onclick:ok},"ตกลง"),h("button",{onclick:()=>done(null)},"ยกเลิก"))));
-a.addEventListener("keydown",e=>{if(e.key==="Enter"&&!b)ok()});document.body.append(o);a.focus()})}
+const NOSRV="เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบ URL ของเซิร์ฟเวอร์และการตั้งค่า Render";
+async function api(p,body){let r;try{r=await fetch(API_BASE.replace(/\/$/,"")+"/api/"+p,{method:"POST",headers:{"Content-Type":"application/json","x-access":AC},body:JSON.stringify(body)})}catch(e){throw new Error(NOSRV)}const j=await r.json().catch(()=>null);if(!j)throw new Error(NOSRV);if(!r.ok)throw new Error(j.error||"ผิดพลาด");return j}
+function ask(title,confirm){return new Promise(res=>{const a=h("input",{type:"password",placeholder:"รหัสผ่าน",autocomplete:"off"}),b=confirm?h("input",{type:"password",placeholder:"ยืนยันรหัสผ่านอีกครั้ง",autocomplete:"off"}):null,er=h("div",{class:"err"});const done=v=>{o.remove();res(v)};const ok=()=>{if(a.value.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";return}if(b&&a.value!==b.value){er.textContent="รหัสผ่านไม่ตรงกัน";return}done(a.value)};const o=h("div",{class:"ov"},h("div",{},h("b",{},title),a,b,er,h("div",{class:"row"},h("button",{class:"pri",onclick:ok},"ตกลง"),h("button",{onclick:()=>done(null)},"ยกเลิก"))));a.addEventListener("keydown",e=>{if(e.key==="Enter"&&!b)ok()});document.body.append(o);a.focus()})}
 function save(name,blob){const u=URL.createObjectURL(blob);const a=h("a",{href:u,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
 function copy(t){return navigator.clipboard.writeText(t).then(()=>toast("คัดลอกแล้ว ✓")).catch(()=>{const a=h("textarea",{value:t});document.body.append(a);a.select();try{document.execCommand("copy");toast("คัดลอกแล้ว ✓")}catch(e){toast("คัดลอกไม่สำเร็จ")}a.remove()})}
-
-/* ---- เข้าเว็บ ---- */
 function gate(msg){
-  const i=h("input",{type:"password",placeholder:"ใส่รหัสเข้าใช้งาน",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:false}),er=h("div",{class:"err"},msg||"");
-  const go=async()=>{AC=i.value.trim();try{await api("list",{q:""});ls.set("ac",AC);app()}catch(e){er.textContent=e.message;i.select()}};
-  i.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
-  $app.replaceChildren(h("div",{class:"wrap gate"},h("h1",{},"🔐 คลังสคริป"),h("div",{class:"mut"},"ใส่รหัสเพื่อเข้าใช้งาน"),i,h("button",{style:"margin-bottom:8px",onclick:()=>{i.type=i.type==="password"?"text":"password"}},"👁 แสดง/ซ่อนรหัสที่พิมพ์"),er,h("div",{}),h("button",{class:"pri",onclick:go},"เข้าสู่คลัง")));
+ const i=h("input",{type:"password",placeholder:"ใส่รหัสเข้าใช้งาน",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:false}),er=h("div",{class:"err"},msg||"");
+ const go=async()=>{AC=i.value.trim();try{await api("list",{q:""});ls.set("ac",AC);app()}catch(e){er.textContent=e.message;i.select()}};
+ i.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+ $app.replaceChildren(h("div",{class:"wrap gate"},h("h1",{},"🔐 คลังสคริป"),h("div",{class:"mut"},"ใส่รหัสเพื่อเข้าใช้งาน"),i,h("button",{style:"margin-bottom:8px",onclick:()=>{i.type=i.type==="password"?"text":"password"}},"👁 แสดง/ซ่อนรหัสที่พิมพ์"),er,h("div",{}),h("button",{class:"pri",onclick:go},"เข้าสู่คลัง")));
 }
-
-/* ---- หน้าหลัก ---- */
 let cards=[];try{cards=JSON.parse(ls.get("cards")||"[]")}catch(e){}
 const pws={};let list,results,sq;
 const persist=()=>ls.set("cards",JSON.stringify(cards.filter(c=>!c.sid)));
 function app(){
-  sq=h("input",{type:"text",placeholder:"พิมพ์ชื่อสคริปที่เคยอัปโหลด…"});
-  sq.addEventListener("keydown",e=>{if(e.key==="Enter")search()});
-  results=h("div");list=h("div");
-  $app.replaceChildren(h("div",{class:"wrap"},
-    h("header",{},h("h1",{},"📚 คลังสคริป"),h("button",{class:"pri",onclick:()=>{cards.unshift({key:uid(),title:"",text:"",files:[]});persist();render()}},"+ เพิ่มช่อง")),
-    h("div",{class:"card"},h("b",{},"🔍 ค้นหาบนเซิร์ฟเวอร์"),h("div",{class:"mut"},"ค้นจากชื่อ แล้วกดเปิดและใส่รหัสผ่านของสคริปนั้น (ใช้ได้จากทุกเครื่อง)"),h("div",{style:"height:8px"}),sq,h("div",{class:"row"},h("button",{class:"pri",onclick:search},"ค้นหา"),h("button",{onclick:()=>{sq.value="";search()}},"ดูทั้งหมด")),results),
-    list));
-  if(!cards.length)cards.push({key:uid(),title:"",text:"",files:[]});
-  render();
+ sq=h("input",{type:"text",placeholder:"พิมพ์ชื่อสคริปที่เคยอัปโหลด…"});sq.addEventListener("keydown",e=>{if(e.key==="Enter")search()});results=h("div");list=h("div");
+ $app.replaceChildren(h("div",{class:"wrap"},h("header",{},h("h1",{},"📚 คลังสคริป"),h("button",{class:"pri",onclick:()=>{cards.unshift({key:uid(),title:"",text:"",files:[]});persist();render()}},"+ เพิ่มช่อง")),h("div",{class:"card"},h("b",{},"🔍 ค้นหาบนเซิร์ฟเวอร์"),h("div",{class:"mut"},"ค้นจากชื่อ แล้วกดเปิดและใส่รหัสผ่านของสคริปนั้น (ใช้ได้จากทุกเครื่อง)"),h("div",{style:"height:8px"}),sq,h("div",{class:"row"},h("button",{class:"pri",onclick:search},"ค้นหา"),h("button",{onclick:()=>{sq.value="";search()}},"ดูทั้งหมด")),results),list));
+ if(!cards.length)cards.push({key:uid(),title:"",text:"",files:[]});render();
 }
-async function search(){
-  try{const r=await api("list",{q:sq.value});
-    results.replaceChildren(...(r.items.length?r.items.map(it=>h("div",{class:"res"},h("span",{},"☁ "+it.name),h("button",{onclick:()=>openRemote(it)},"เปิด"))):[h("div",{class:"mut",style:"margin-top:10px"},"ไม่พบสคริปที่ตรงกับชื่อนี้")]));
-  }catch(e){toast(e.message)}
-}
-async function openRemote(it){
-  const ex=cards.find(c=>c.sid===it.id);if(ex){toast("เปิดอยู่ในหน้านี้แล้ว");return}
-  const pw=await ask("ใส่รหัสผ่านของ “"+it.name+"”");if(!pw)return;
-  try{const r=await api("open",{id:it.id,password:pw});pws[it.id]=pw;cards.unshift({key:uid(),title:r.name,text:r.text,files:r.files,sid:it.id});render();toast("เปิดแล้ว ✓")}catch(e){toast(e.message)}
-}
-async function upload(c){
-  if(!c.title.trim()){toast("ใส่ชื่อสคริปก่อน");return}
-  try{
-    if(c.sid){const pw=pws[c.sid]||await ask("ใส่รหัสผ่านของสคริปนี้");if(!pw)return;pws[c.sid]=pw;await api("update",{id:c.sid,password:pw,name:c.title.trim(),text:c.text,files:c.files});toast("บันทึกขึ้นเซิร์ฟเวอร์แล้ว ✓")}
-    else{const pw=await ask("ตั้งรหัสผ่านให้สคริปนี้ (ลืมแล้วกู้คืนไม่ได้)",true);if(!pw)return;const r=await api("create",{name:c.title.trim(),password:pw,text:c.text,files:c.files});c.sid=r.id;pws[r.id]=pw;persist();render();toast("อัปโหลดขึ้นเซิร์ฟเวอร์แล้ว ✓")}
-  }catch(e){if(c.sid)delete pws[c.sid];toast(e.message)}
-}
-async function removeRemote(c){
-  if(!confirm("ลบสคริปนี้ออกจากเซิร์ฟเวอร์ถาวร?"))return;
-  try{const pw=pws[c.sid]||await ask("ใส่รหัสผ่านเพื่อยืนยันการลบ");if(!pw)return;await api("delete",{id:c.sid,password:pw});delete pws[c.sid];cards=cards.filter(x=>x!==c);render();toast("ลบแล้ว")}catch(e){delete pws[c.sid];toast(e.message)}
-}
+async function search(){try{const r=await api("list",{q:sq.value});results.replaceChildren(...(r.items.length?r.items.map(it=>h("div",{class:"res"},h("span",{},"☁ "+it.name),h("button",{onclick:()=>openRemote(it)},"เปิด"))):[h("div",{class:"mut",style:"margin-top:10px"},"ไม่พบสคริปที่ตรงกับชื่อนี้")]))}catch(e){toast(e.message)}}
+async function openRemote(it){const ex=cards.find(c=>c.sid===it.id);if(ex){toast("เปิดอยู่ในหน้านี้แล้ว");return}const pw=await ask("ใส่รหัสผ่านของ “"+it.name+"”");if(!pw)return;try{const r=await api("open",{id:it.id,password:pw});pws[it.id]=pw;cards.unshift({key:uid(),title:r.name,text:r.text,files:r.files,sid:it.id});render();toast("เปิดแล้ว ✓")}catch(e){toast(e.message)}}
+async function upload(c){if(!c.title.trim()){toast("ใส่ชื่อสคริปก่อน");return}try{if(c.sid){const pw=pws[c.sid]||await ask("ใส่รหัสผ่านของสคริปนี้");if(!pw)return;pws[c.sid]=pw;await api("update",{id:c.sid,password:pw,name:c.title.trim(),text:c.text,files:c.files});toast("บันทึกขึ้นเซิร์ฟเวอร์แล้ว ✓")}else{const pw=await ask("ตั้งรหัสผ่านให้สคริปนี้ (ลืมแล้วกู้คืนไม่ได้)",true);if(!pw)return;const r=await api("create",{name:c.title.trim(),password:pw,text:c.text,files:c.files});c.sid=r.id;pws[r.id]=pw;persist();render();toast("อัปโหลดขึ้นเซิร์ฟเวอร์แล้ว ✓")}}catch(e){if(c.sid)delete pws[c.sid];toast(e.message)}}
+async function removeRemote(c){if(!confirm("ลบสคริปนี้ออกจากเซิร์ฟเวอร์ถาวร?"))return;try{const pw=pws[c.sid]||await ask("ใส่รหัสผ่านเพื่อยืนยันการลบ");if(!pw)return;await api("delete",{id:c.sid,password:pw});delete pws[c.sid];cards=cards.filter(x=>x!==c);render();toast("ลบแล้ว")}catch(e){delete pws[c.sid];toast(e.message)}}
 function chips(c){return h("div",{class:"files"},c.files.map((f,i)=>h("span",{class:"chip"},h("span",{title:"ดาวน์โหลด",onclick:()=>save(f.name,new Blob([unb64(f.b64)],{type:f.type||"application/octet-stream"}))},"⬇ "+f.name+" ("+fsz(f.size)+")"),h("b",{onclick:()=>{c.files.splice(i,1);persist();render()}},"✕"))))}
 function card(c){
-  const ti=h("input",{type:"text",placeholder:"ชื่อสคริป (ใช้ค้นหาบนเซิร์ฟเวอร์)",value:c.title,oninput:e=>{c.title=e.target.value;persist()}});
-  const ta=h("textarea",{placeholder:"วางข้อความหรือโค้ดที่นี่…",value:c.text,spellcheck:false,oninput:e=>{c.text=e.target.value;persist()}});
-  const fi=h("input",{type:"file",multiple:true,hidden:true});
-  fi.addEventListener("change",async()=>{for(const f of fi.files){if(f.size>3*1048576){toast(f.name+" ใหญ่เกิน 3 MB");continue}c.files.push({name:f.name,size:f.size,type:f.type,b64:b64(await f.arrayBuffer())})}fi.value="";persist();render()});
-  return h("div",{class:"card"},c.sid?h("div",{class:"badge"},"☁ อยู่บนเซิร์ฟเวอร์ · แก้แล้วกดบันทึกขึ้นเซิร์ฟเวอร์"):h("div",{class:"badge mut"},"ยังไม่ได้อัปโหลด (เก็บชั่วคราวในเครื่องนี้)"),ti,ta,chips(c),
-    h("div",{class:"row"},
-      h("button",{class:"pri",onclick:()=>upload(c)},c.sid?"☁ บันทึกขึ้นเซิร์ฟเวอร์":"☁ อัปโหลดขึ้นเซิร์ฟเวอร์"),
-      h("button",{onclick:()=>copy(c.text)},"📋 คัดลอก"),
-      h("button",{onclick:()=>save((c.title||"script").replace(/[\\/:*?"<>|]/g,"_")+".txt",new Blob([c.text],{type:"text/plain;charset=utf-8"}))},"⬇ ดาวน์โหลด"),
-      h("button",{onclick:()=>fi.click()},"📎 แนบไฟล์"),fi,
-      c.sid?h("button",{onclick:()=>{cards=cards.filter(x=>x!==c);render()}},"ปิด"):null,
-      c.sid?h("button",{class:"dng",onclick:()=>removeRemote(c)},"ลบจากเซิร์ฟเวอร์"):h("button",{class:"dng",onclick:()=>{if(confirm("ลบช่องนี้ออกจากหน้านี้?")){cards=cards.filter(x=>x!==c);persist();render()}}},"ลบช่อง")));
+ const ti=h("input",{type:"text",placeholder:"ชื่อสคริป (ใช้ค้นหาบนเซิร์ฟเวอร์)",value:c.title,oninput:e=>{c.title=e.target.value;persist()}});
+ const ta=h("textarea",{placeholder:"วางข้อความหรือโค้ดที่นี่…",value:c.text,spellcheck:false,oninput:e=>{c.text=e.target.value;persist()}});
+ const fi=h("input",{type:"file",multiple:true,hidden:true});
+ fi.addEventListener("change",async()=>{for(const f of fi.files){if(f.size>3*1048576){toast(f.name+" ใหญ่เกิน 3 MB");continue}c.files.push({name:f.name,size:f.size,type:f.type,b64:b64(await f.arrayBuffer())})}fi.value="";persist();render()});
+ return h("div",{class:"card"},c.sid?h("div",{class:"badge"},"☁ อยู่บนเซิร์ฟเวอร์ · แก้แล้วกดบันทึกขึ้นเซิร์ฟเวอร์"):h("div",{class:"badge mut"},"ยังไม่ได้อัปโหลด (เก็บชั่วคราวในเครื่องนี้)"),ti,ta,chips(c),h("div",{class:"row"},h("button",{class:"pri",onclick:()=>upload(c)},c.sid?"☁ บันทึกขึ้นเซิร์ฟเวอร์":"☁ อัปโหลดขึ้นเซิร์ฟเวอร์"),h("button",{onclick:()=>copy(c.text)},"📋 คัดลอก"),h("button",{onclick:()=>save((c.title||"script").replace(/[\\/:*?"<>|]/g,"_")+".txt",new Blob([c.text],{type:"text/plain;charset=utf-8"}))},"⬇ ดาวน์โหลด"),h("button",{onclick:()=>fi.click()},"📎 แนบไฟล์"),fi,c.sid?h("button",{onclick:()=>{cards=cards.filter(x=>x!==c);render()}},"ปิด"):null,c.sid?h("button",{class:"dng",onclick:()=>removeRemote(c)},"ลบจากเซิร์ฟเวอร์"):h("button",{class:"dng",onclick:()=>{if(confirm("ลบช่องนี้ออกจากหน้านี้?")){cards=cards.filter(x=>x!==c);persist();render()}}},"ลบช่อง")));
 }
 function render(){list.replaceChildren(...cards.map(card))}
-
 (async()=>{if(!AC)return gate();try{await api("list",{q:""});app()}catch(e){gate(e.message)}})();
 </script>
 </body>
