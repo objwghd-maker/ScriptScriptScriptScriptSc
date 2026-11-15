@@ -3,7 +3,7 @@
 // ตัวแปรเสริม: PORT, ACCESS_CODE (รหัสเข้าเว็บ), DATA_DIR (โฟลเดอร์เก็บข้อมูล ต้องเป็นดิสก์ถาวร)
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000;
-const ACCESS = process.env.ACCESS_CODE || 'Augjdlohoo8yek2';
+const ACCESS = (process.env.ACCESS_CODE || 'Augjdlohoo8yek2').trim();
 const DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const FILE = path.join(DIR, 'vault.json');
 fs.mkdirSync(DIR, { recursive: true });
@@ -85,7 +85,7 @@ http.createServer((req, res) => {
   req.on('data', c => { size += c.length; if (size > 12e6) req.destroy(); else chunks.push(c); });
   req.on('end', () => {
     try {
-      if ((req.headers['x-access'] || '') !== ACCESS) return send(res, 401, { error: 'รหัสเข้าใช้งานไม่ถูกต้อง' });
+      if (String(req.headers['x-access'] || '').trim() !== ACCESS) return send(res, 401, { error: 'รหัสเข้าใช้งานไม่ถูกต้อง' });
       route(req.url, JSON.parse(Buffer.concat(chunks).toString() || '{}'), res);
     } catch (e) { send(res, 400, { error: 'คำขอไม่ถูกต้อง' }); }
   });
