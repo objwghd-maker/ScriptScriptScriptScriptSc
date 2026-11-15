@@ -1,13 +1,4 @@
 <!doctype html>
-<!--
-วิธีตั้งค่า (ครั้งเดียว):
-1) console.firebase.google.com > สร้างโปรเจกต์ > Authentication > เปิด Google
-2) Firestore Database > สร้างฐานข้อมูล > Rules วางตามนี้:
-   rules_version='2'; service cloud.firestore { match /databases/{d}/documents {
-     match /users/{uid}/items/{id} { allow read, write: if request.auth != null && request.auth.uid == uid; } } }
-3) Project settings > Your apps > Web > คัดลอกค่าไปใส่ FIREBASE_CONFIG ในไฟล์นี้
-4) นำไฟล์ขึ้นโฮสต์ (Firebase Hosting ฟรี) แล้วเพิ่มโดเมนใน Authentication > Authorized domains
--->
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -17,169 +8,116 @@
 :root{color-scheme:light;--bg:#f6f5f1;--card:#fff;--ink:#1d1d1b;--mut:#6b6a63;--line:#e2e0d8;--acc:#2f6f5e;--accink:#fff;--code:#f0efe9;--danger:#b3372c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#141513;--card:#1e201d;--ink:#ecebe4;--mut:#9a9a90;--line:#33352f;--acc:#5fb59d;--accink:#0d1a16;--code:#161815;--danger:#ef7b6e}}
 :root[data-theme="dark"]{color-scheme:dark;--bg:#141513;--card:#1e201d;--ink:#ecebe4;--mut:#9a9a90;--line:#33352f;--acc:#5fb59d;--accink:#0d1a16;--code:#161815;--danger:#ef7b6e}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Noto Sans Thai","Sarabun",sans-serif;min-height:100%}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Noto Sans Thai","Sarabun",sans-serif}
 .wrap{max-width:760px;margin:0 auto;padding:16px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 h1{font-size:22px;margin:0}
-.who{font-size:13px;color:var(--mut)}
 button{font:inherit;font-size:14px;padding:7px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 button.pri{background:var(--acc);color:var(--accink);border-color:var(--acc)}
 button.dng{color:var(--danger)}
-button:disabled{opacity:.5}
 input[type=text],input[type=password],textarea{width:100%;font:inherit;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
-textarea{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:180px;resize:vertical;white-space:pre;overflow:auto}
+textarea{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:170px;resize:vertical;white-space:pre;overflow:auto;margin-top:8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.card h3{margin:0 0 8px;font-size:17px;display:flex;gap:6px;align-items:center;word-break:break-word}
-pre{margin:0 0 10px;background:var(--code);border-radius:10px;padding:10px 12px;max-height:320px;overflow:auto;font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.files{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--code);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer}
-.chip.x{cursor:default}
+.files{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{display:inline-flex;gap:6px;align-items:center;background:var(--code);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer}
 .mut{color:var(--mut);font-size:13px}
-.empty{text-align:center;color:var(--mut);padding:40px 10px}
+.badge{font-size:12px;color:var(--acc);margin-bottom:6px}
+.res{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);word-break:break-word}
 .gate{max-width:380px;margin:18vh auto 0;text-align:center}
 .gate input{margin:14px 0 10px;text-align:center}
 .err{color:var(--danger);font-size:14px;min-height:20px}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
 .ov>div{background:var(--card);border-radius:14px;padding:16px;width:100%;max-width:340px}
 .ov input{margin:8px 0}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;max-width:90%;text-align:center}
 #toast.on{opacity:1}
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<div id="app"></div>
-<div id="toast"></div>
+<div id="app"></div><div id="toast"></div>
 <script>
-const CODE_HASH="ce80afceca0b7cd72ef7d28092555e2842aa40711dd712515256f2fd489e0bfa";
-const $app=document.getElementById("app"),$toast=document.getElementById("toast");
-const enc=new TextEncoder(),dec=new TextDecoder();
-const h=(t,p={},...c)=>{const e=document.createElement(t);for(const k in p){if(k.startsWith("on"))e.addEventListener(k.slice(2),p[k]);else if(k==="class")e.className=p[k];else if(k in e)e[k]=p[k];else e.setAttribute(k,p[k]);}c.flat().forEach(x=>x!=null&&e.append(x.nodeType?x:document.createTextNode(x)));return e;};
-let tt;const toast=m=>{$toast.textContent=m;$toast.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>$toast.classList.remove("on"),2200)};
+const $app=document.getElementById("app"),$t=document.getElementById("toast");
+const h=(t,p={},...c)=>{const e=document.createElement(t);for(const k in p){if(k.startsWith("on"))e.addEventListener(k.slice(2),p[k]);else if(k==="class")e.className=p[k];else if(k in e)e[k]=p[k];else e.setAttribute(k,p[k]);}c.flat().forEach(x=>x!=null&&e.append(x.nodeType?x:document.createTextNode(x)));return e};
+let tt;const toast=m=>{$t.textContent=m;$t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>$t.classList.remove("on"),2600)};
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 const b64=u=>{u=new Uint8Array(u);let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const sha=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",enc.encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
-async function mkKey(pw,salt){const k=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:150000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
-async function encText(key,text){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,enc.encode(text));return{iv:b64(iv),ct:b64(ct)}}
-async function decText(key,rec){return dec.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(rec.iv)},key,unb64(rec.ct)))}
-const ss={get:k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{sessionStorage.setItem(k,v)}catch(e){}}};
-
+const uid=()=>Math.random().toString(36).slice(2,10);
+const fsz=n=>n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
+let AC=ls.get("ac")||"";
+async function api(p,body){let r;try{r=await fetch("/api/"+p,{method:"POST",headers:{"Content-Type":"application/json","x-access":AC},body:JSON.stringify(body)})}catch(e){throw new Error("ติดต่อเซิร์ฟเวอร์ไม่ได้")}const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"ผิดพลาด");return j}
 function ask(title,confirm){return new Promise(res=>{const a=h("input",{type:"password",placeholder:"รหัสผ่าน",autocomplete:"off"}),b=confirm?h("input",{type:"password",placeholder:"ยืนยันรหัสผ่านอีกครั้ง",autocomplete:"off"}):null,er=h("div",{class:"err"});
 const done=v=>{o.remove();res(v)};
-const ok=()=>{if(!a.value){er.textContent="กรุณาใส่รหัสผ่าน";return}if(b&&a.value!==b.value){er.textContent="รหัสผ่านไม่ตรงกัน";return}done(a.value)};
+const ok=()=>{if(a.value.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";return}if(b&&a.value!==b.value){er.textContent="รหัสผ่านไม่ตรงกัน";return}done(a.value)};
 const o=h("div",{class:"ov"},h("div",{},h("b",{},title),a,b,er,h("div",{class:"row"},h("button",{class:"pri",onclick:ok},"ตกลง"),h("button",{onclick:()=>done(null)},"ยกเลิก"))));
 a.addEventListener("keydown",e=>{if(e.key==="Enter"&&!b)ok()});document.body.append(o);a.focus()})}
+function save(name,blob){const u=URL.createObjectURL(blob);const a=h("a",{href:u,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+function copy(t){return navigator.clipboard.writeText(t).then(()=>toast("คัดลอกแล้ว ✓")).catch(()=>{const a=h("textarea",{value:t});document.body.append(a);a.select();try{document.execCommand("copy");toast("คัดลอกแล้ว ✓")}catch(e){toast("คัดลอกไม่สำเร็จ")}a.remove()})}
 
-/* ---------- gate ---------- */
-function showGate(){
-  const i=h("input",{type:"password",placeholder:"ใส่รหัสเข้าใช้งาน",autocomplete:"off"}),er=h("div",{class:"err"});
-  const go=async()=>{if(await sha(i.value.trim())===CODE_HASH){ss.set("ok","1");start()}else{er.textContent="รหัสไม่ถูกต้อง";i.select()}};
+/* ---- เข้าเว็บ ---- */
+function gate(msg){
+  const i=h("input",{type:"password",placeholder:"ใส่รหัสเข้าใช้งาน",autocomplete:"off"}),er=h("div",{class:"err"},msg||"");
+  const go=async()=>{AC=i.value.trim();try{await api("list",{q:""});ls.set("ac",AC);app()}catch(e){er.textContent=e.message;i.select()}};
   i.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
   $app.replaceChildren(h("div",{class:"wrap gate"},h("h1",{},"🔐 คลังสคริป"),h("div",{class:"mut"},"ใส่รหัสเพื่อเข้าใช้งาน"),i,er,h("button",{class:"pri",onclick:go},"เข้าสู่คลัง")));
 }
 
-/* ---------- main ---------- */
-/* ใส่ค่าจาก Firebase Console > Project settings > Your apps (Web) */
-const FIREBASE_CONFIG={apiKey:"ใส่ค่าของคุณ",authDomain:"",projectId:"",appId:""};
-let col,list,auth,fs,unsub,items=new Map(),drafts=new Map(),opened=new Map();
-function showLogin(ok=true){$app.replaceChildren(h("div",{class:"wrap gate"},h("h1",{},"📚 คลังสคริป"),h("div",{class:"mut"},"เข้าสู่ระบบเพื่อเปิดข้อมูลของคุณ"),h("div",{style:"height:16px"}),h("button",{class:"pri",style:"width:100%;padding:11px",onclick:()=>{if(!ok){toast("ยังไม่ได้ใส่ค่า FIREBASE_CONFIG");return}auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(()=>toast("เข้าสู่ระบบไม่สำเร็จ"))}},"เข้าสู่ระบบด้วย Google"),h("div",{style:"height:10px"}),h("button",{onclick:startLocal},"ใช้แบบเก็บในเครื่องนี้")))}
-function startLocal(){
-  const K="vault_items";let mem={};
-  const rd=()=>{try{return JSON.parse(localStorage.getItem(K)||"{}")}catch(e){return mem}};
-  const wr=o=>{mem=o;try{localStorage.setItem(K,JSON.stringify(o))}catch(e){toast("พื้นที่เก็บเต็ม")}};
-  const subs=[];
-  const emit=()=>{const o=rd();const sn={docs:Object.keys(o).map(id=>({id,data:()=>o[id]}))};subs.forEach(f=>f(sn))};
-  col={doc:id=>({set:async r=>{const o=rd();o[id]=JSON.parse(JSON.stringify(r));wr(o);emit()},delete:async()=>{const o=rd();delete o[id];wr(o);emit()}}),onSnapshot:f=>{subs.push(f);emit();return()=>{}}};
-  list=h("div");
-  $app.replaceChildren(h("div",{class:"wrap"},h("header",{},h("h1",{},"📚 คลังสคริป"),h("button",{class:"pri",onclick:addCard},"+ เพิ่มช่อง")),list));
-  col.onSnapshot(sn=>{items=new Map(sn.docs.map(d=>[d.id,d.data()]));render()});
-}
-function start(){
-  if(!window.firebase||FIREBASE_CONFIG.apiKey.startsWith("ใส่")){showLogin(false);return}
-  if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
-  auth=firebase.auth();fs=firebase.firestore();
-  auth.onAuthStateChanged(u=>{
-    if(unsub){unsub();unsub=null}
-    items=new Map();drafts=new Map();opened=new Map();
-    if(!u){showLogin();return}
-    col=fs.collection("users").doc(u.uid).collection("items");
-    list=h("div");
-    $app.replaceChildren(h("div",{class:"wrap"},h("header",{},h("div",{},h("h1",{},"📚 คลังสคริป"),h("div",{class:"who"},"บัญชี: "+(u.displayName||u.email||"ของคุณ")+" · ข้อมูลเก็บแยกเฉพาะคุณ")),h("div",{class:"row",style:"margin:0"},h("button",{class:"pri",onclick:addCard},"+ เพิ่มช่อง"),h("button",{onclick:()=>auth.signOut()},"ออก"))),list));
-    unsub=col.onSnapshot(sn=>{items=new Map(sn.docs.map(d=>[d.id,d.data()]));render()},()=>toast("โหลดข้อมูลไม่สำเร็จ"));
-  });
-}
-function addCard(){const id="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);drafts.set(id,{title:"",text:"",files:[],isNew:true});render()}
-function render(){
-  const ids=[...drafts.keys()].filter(k=>drafts.get(k).isNew).reverse();
-  const saved=[...items.entries()].sort((a,b)=>(b[1].updated||0)-(a[1].updated||0)).map(e=>e[0]);
-  const all=[...ids,...saved];
-  list.replaceChildren(...(all.length?all.map(card):[h("div",{class:"empty"},"ยังไม่มีช่อง กด “+ เพิ่มช่อง” เพื่อเริ่มเก็บสคริปต์")]));
-}
-function copy(t){return navigator.clipboard.writeText(t).then(()=>toast("คัดลอกแล้ว ✓")).catch(()=>{const a=h("textarea",{value:t});document.body.append(a);a.select();try{document.execCommand("copy");toast("คัดลอกแล้ว ✓")}catch(e){toast("คัดลอกไม่สำเร็จ")}a.remove()})}
-async function saveFile(name,data){const u=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type:"text/plain;charset=utf-8"}));const a=h("a",{href:u,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
-async function getFile(f){return new Blob([unb64(f.b64)],{type:f.type||"application/octet-stream"})}
-const fsz=n=>n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
-
-async function unlock(id){const it=items.get(id);const pw=await ask("ใส่รหัสผ่านของช่องนี้");if(!pw)return;try{const key=await mkKey(pw,unb64(it.salt));const text=await decText(key,it);opened.set(id,{key,text});render()}catch(e){toast("รหัสผ่านไม่ถูกต้อง")}}
-async function lock(id){const it=items.get(id);const pw=await ask("ตั้งรหัสผ่านให้ช่องนี้",true);if(!pw)return;const salt=crypto.getRandomValues(new Uint8Array(16));const key=await mkKey(pw,salt);const e=await encText(key,it.text||"");
-  await put(id,{...it,text:"",locked:true,salt:b64(salt),iv:e.iv,ct:e.ct});opened.set(id,{key,text:it.text||""});toast("ล็อกแล้ว 🔒")}
-async function unlockForever(id){const o=opened.get(id),it=items.get(id);const rec={...it,text:o.text,locked:false};delete rec.salt;delete rec.iv;delete rec.ct;await put(id,rec);opened.delete(id);toast("เอารหัสออกแล้ว")}
-async function put(id,rec){try{await col.doc(id).set(rec)}catch(e){toast("บันทึกไม่สำเร็จ");throw e}}
-
-async function save(id){
-  const d=drafts.get(id),base=items.get(id)||{};
-  const rec={title:d.title.trim()||"ไม่มีชื่อ",files:d.files,created:base.created||Date.now(),updated:Date.now(),locked:!!base.locked,text:""};
-  if(base.locked){const o=opened.get(id);const e=await encText(o.key,d.text);rec.salt=base.salt;rec.iv=e.iv;rec.ct=e.ct;opened.set(id,{key:o.key,text:d.text})}else rec.text=d.text;
-  await put(id,rec);drafts.delete(id);toast("บันทึกแล้ว ✓");render();
-}
-async function del(id){if(!confirm("ลบช่องนี้ถาวร?"))return;try{await col.doc(id).delete();opened.delete(id);drafts.delete(id);toast("ลบแล้ว")}catch(e){toast("ลบไม่สำเร็จ")}}
-
-async function attach(d,files,btn){
-  btn.disabled=true;
-  for(const f of files){try{
-    if(f.size<=600*1024)d.files.push({name:f.name,size:f.size,type:f.type,b64:b64(await f.arrayBuffer())});
-    else toast(f.name+" ใหญ่เกิน 600 KB");
-  }catch(e){toast("แนบ "+f.name+" ไม่สำเร็จ")}}
+/* ---- หน้าหลัก ---- */
+let cards=[];try{cards=JSON.parse(ls.get("cards")||"[]")}catch(e){}
+const pws={};let list,results,sq;
+const persist=()=>ls.set("cards",JSON.stringify(cards.filter(c=>!c.sid)));
+function app(){
+  sq=h("input",{type:"text",placeholder:"พิมพ์ชื่อสคริปที่เคยอัปโหลด…"});
+  sq.addEventListener("keydown",e=>{if(e.key==="Enter")search()});
+  results=h("div");list=h("div");
+  $app.replaceChildren(h("div",{class:"wrap"},
+    h("header",{},h("h1",{},"📚 คลังสคริป"),h("button",{class:"pri",onclick:()=>{cards.unshift({key:uid(),title:"",text:"",files:[]});persist();render()}},"+ เพิ่มช่อง")),
+    h("div",{class:"card"},h("b",{},"🔍 ค้นหาบนเซิร์ฟเวอร์"),h("div",{class:"mut"},"ค้นจากชื่อ แล้วกดเปิดและใส่รหัสผ่านของสคริปนั้น (ใช้ได้จากทุกเครื่อง)"),h("div",{style:"height:8px"}),sq,h("div",{class:"row"},h("button",{class:"pri",onclick:search},"ค้นหา"),h("button",{onclick:()=>{sq.value="";search()}},"ดูทั้งหมด")),results),
+    list));
+  if(!cards.length)cards.push({key:uid(),title:"",text:"",files:[]});
   render();
 }
-
-function fileChips(files,removable,d){
-  return h("div",{class:"files"},files.map((f,i)=>removable
-    ?h("span",{class:"chip x"},"📎 "+f.name+" ("+fsz(f.size)+")",h("b",{style:"cursor:pointer",onclick:()=>{d.files.splice(i,1);render()}},"✕"))
-    :h("span",{class:"chip",title:"ดาวน์โหลด",onclick:async()=>{try{saveFile(f.name,await getFile(f))}catch(e){toast("เปิดไฟล์ไม่สำเร็จ")}}},"⬇ "+f.name+" ("+fsz(f.size)+")")));
+async function search(){
+  try{const r=await api("list",{q:sq.value});
+    results.replaceChildren(...(r.items.length?r.items.map(it=>h("div",{class:"res"},h("span",{},"☁ "+it.name),h("button",{onclick:()=>openRemote(it)},"เปิด"))):[h("div",{class:"mut",style:"margin-top:10px"},"ไม่พบสคริปที่ตรงกับชื่อนี้")]));
+  }catch(e){toast(e.message)}
 }
-
-function card(id){
-  const it=items.get(id)||{},d=drafts.get(id),o=opened.get(id);
-  /* edit mode */
-  if(d){
-    const ti=h("input",{type:"text",placeholder:"หัวข้อ",value:d.title,oninput:e=>d.title=e.target.value});
-    const ta=h("textarea",{placeholder:"วางข้อความหรือโค้ดที่นี่…",value:d.text,spellcheck:false,oninput:e=>d.text=e.target.value});
-    const fi=h("input",{type:"file",multiple:true,hidden:true});
-    const ab=h("button",{onclick:()=>fi.click()},"📎 แนบไฟล์");
-    fi.addEventListener("change",()=>attach(d,[...fi.files],ab));
-    return h("div",{class:"card"},ti,h("div",{style:"height:8px"}),ta,fileChips(d.files,true,d),h("div",{class:"row"},h("button",{class:"pri",onclick:()=>save(id)},"💾 บันทึก"),ab,fi,h("button",{onclick:()=>{drafts.delete(id);render()}},"ยกเลิก")));
-  }
-  /* view mode */
-  const locked=it.locked&&!o;
-  const text=it.locked?(o?o.text:""):(it.text||"");
-  const body=locked?h("pre",{class:"mut"},"🔒 ช่องนี้ถูกล็อกด้วยรหัสผ่าน"):h("pre",{},text||"(ไม่มีข้อความ)");
-  const btns=locked
-    ?[h("button",{class:"pri",onclick:()=>unlock(id)},"🔓 ปลดล็อก")]
-    :[h("button",{class:"pri",onclick:()=>copy(text)},"📋 คัดลอก"),
-      h("button",{onclick:()=>saveFile((it.title||"script").replace(/[\\/:*?"<>|]/g,"_")+".txt",text)},"⬇ ดาวน์โหลด"),
-      h("button",{onclick:()=>{drafts.set(id,{title:it.title||"",text,files:[...(it.files||[])]});render()}},"✏️ แก้ไข"),
-      it.locked?h("button",{onclick:()=>unlockForever(id)},"เอารหัสออก"):h("button",{onclick:()=>lock(id)},"🔒 ใส่รหัส")];
-  btns.push(h("button",{class:"dng",onclick:()=>del(id)},"ลบ"));
-  return h("div",{class:"card"},h("h3",{},it.locked?"🔒 ":"",it.title||"ไม่มีชื่อ"),body,fileChips(it.files||[],false),h("div",{class:"row"},btns));
+async function openRemote(it){
+  const ex=cards.find(c=>c.sid===it.id);if(ex){toast("เปิดอยู่ในหน้านี้แล้ว");return}
+  const pw=await ask("ใส่รหัสผ่านของ “"+it.name+"”");if(!pw)return;
+  try{const r=await api("open",{id:it.id,password:pw});pws[it.id]=pw;cards.unshift({key:uid(),title:r.name,text:r.text,files:r.files,sid:it.id});render();toast("เปิดแล้ว ✓")}catch(e){toast(e.message)}
 }
+async function upload(c){
+  if(!c.title.trim()){toast("ใส่ชื่อสคริปก่อน");return}
+  try{
+    if(c.sid){const pw=pws[c.sid]||await ask("ใส่รหัสผ่านของสคริปนี้");if(!pw)return;pws[c.sid]=pw;await api("update",{id:c.sid,password:pw,name:c.title.trim(),text:c.text,files:c.files});toast("บันทึกขึ้นเซิร์ฟเวอร์แล้ว ✓")}
+    else{const pw=await ask("ตั้งรหัสผ่านให้สคริปนี้ (ลืมแล้วกู้คืนไม่ได้)",true);if(!pw)return;const r=await api("create",{name:c.title.trim(),password:pw,text:c.text,files:c.files});c.sid=r.id;pws[r.id]=pw;persist();render();toast("อัปโหลดขึ้นเซิร์ฟเวอร์แล้ว ✓")}
+  }catch(e){if(c.sid)delete pws[c.sid];toast(e.message)}
+}
+async function removeRemote(c){
+  if(!confirm("ลบสคริปนี้ออกจากเซิร์ฟเวอร์ถาวร?"))return;
+  try{const pw=pws[c.sid]||await ask("ใส่รหัสผ่านเพื่อยืนยันการลบ");if(!pw)return;await api("delete",{id:c.sid,password:pw});delete pws[c.sid];cards=cards.filter(x=>x!==c);render();toast("ลบแล้ว")}catch(e){delete pws[c.sid];toast(e.message)}
+}
+function chips(c){return h("div",{class:"files"},c.files.map((f,i)=>h("span",{class:"chip"},h("span",{title:"ดาวน์โหลด",onclick:()=>save(f.name,new Blob([unb64(f.b64)],{type:f.type||"application/octet-stream"}))},"⬇ "+f.name+" ("+fsz(f.size)+")"),h("b",{onclick:()=>{c.files.splice(i,1);persist();render()}},"✕"))))}
+function card(c){
+  const ti=h("input",{type:"text",placeholder:"ชื่อสคริป (ใช้ค้นหาบนเซิร์ฟเวอร์)",value:c.title,oninput:e=>{c.title=e.target.value;persist()}});
+  const ta=h("textarea",{placeholder:"วางข้อความหรือโค้ดที่นี่…",value:c.text,spellcheck:false,oninput:e=>{c.text=e.target.value;persist()}});
+  const fi=h("input",{type:"file",multiple:true,hidden:true});
+  fi.addEventListener("change",async()=>{for(const f of fi.files){if(f.size>3*1048576){toast(f.name+" ใหญ่เกิน 3 MB");continue}c.files.push({name:f.name,size:f.size,type:f.type,b64:b64(await f.arrayBuffer())})}fi.value="";persist();render()});
+  return h("div",{class:"card"},c.sid?h("div",{class:"badge"},"☁ อยู่บนเซิร์ฟเวอร์ · แก้แล้วกดบันทึกขึ้นเซิร์ฟเวอร์"):h("div",{class:"badge mut"},"ยังไม่ได้อัปโหลด (เก็บชั่วคราวในเครื่องนี้)"),ti,ta,chips(c),
+    h("div",{class:"row"},
+      h("button",{class:"pri",onclick:()=>upload(c)},c.sid?"☁ บันทึกขึ้นเซิร์ฟเวอร์":"☁ อัปโหลดขึ้นเซิร์ฟเวอร์"),
+      h("button",{onclick:()=>copy(c.text)},"📋 คัดลอก"),
+      h("button",{onclick:()=>save((c.title||"script").replace(/[\\/:*?"<>|]/g,"_")+".txt",new Blob([c.text],{type:"text/plain;charset=utf-8"}))},"⬇ ดาวน์โหลด"),
+      h("button",{onclick:()=>fi.click()},"📎 แนบไฟล์"),fi,
+      c.sid?h("button",{onclick:()=>{cards=cards.filter(x=>x!==c);render()}},"ปิด"):null,
+      c.sid?h("button",{class:"dng",onclick:()=>removeRemote(c)},"ลบจากเซิร์ฟเวอร์"):h("button",{class:"dng",onclick:()=>{if(confirm("ลบช่องนี้ออกจากหน้านี้?")){cards=cards.filter(x=>x!==c);persist();render()}}},"ลบช่อง")));
+}
+function render(){list.replaceChildren(...cards.map(card))}
 
-if(ss.get("ok")==="1")start();else showGate();
+(async()=>{if(!AC)return gate();try{await api("list",{q:""});app()}catch(e){gate(e.message==="ติดต่อเซิร์ฟเวอร์ไม่ได้"?e.message:"")}})();
 </script>
 </body>
 </html>
